@@ -10,59 +10,38 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0f1117;
-  --surface: #161a24;
-  --card: #1c2130;
-  --card2: #212636;
-  --border: rgba(255,255,255,0.07);
-  --border-em: rgba(255,255,255,0.13);
-  --text: #e8eaf0;
-  --muted: #8b90a0;
-  --hint: #555b6e;
-  --accent: #e09840;
-  --accent-dim: rgba(224,152,64,0.12);
-  --accent-text: #f0b860;
-  --tag-bg: rgba(55,138,221,0.15);
-  --tag-text: #7db8f0;
-  --danger: #e24b4a;
-  --success: #4caf7d;
+  --bg: #0f1117; --surface: #161a24; --card: #1c2130; --card2: #212636;
+  --border: rgba(255,255,255,0.07); --border-em: rgba(255,255,255,0.13);
+  --text: #e8eaf0; --muted: #8b90a0; --hint: #555b6e;
+  --accent: #e09840; --accent-dim: rgba(224,152,64,0.12); --accent-text: #f0b860;
+  --tag-bg: rgba(55,138,221,0.15); --tag-text: #7db8f0;
+  --danger: #e24b4a; --success: #4caf7d;
   --mono: 'Cascadia Code','Fira Code','Consolas',monospace;
   --sans: 'Segoe UI',system-ui,sans-serif;
-  --radius: 8px;
-  --radius-lg: 12px;
-  --nav-h: 52px;
+  --radius: 8px; --radius-lg: 12px; --nav-h: 52px;
 }
 html, body { height: 100%; overflow: hidden; }
 body { font-family: var(--sans); background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
 
-/* ── Top nav ── */
-#topnav {
-  height: var(--nav-h); flex-shrink: 0;
-  display: flex; align-items: center; gap: 10px;
-  padding: 0 16px;
-  border-bottom: 0.5px solid var(--border);
-  background: var(--surface);
-  position: relative; z-index: 50;
-}
+/* nav */
+#topnav { height: var(--nav-h); flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-bottom: 0.5px solid var(--border); background: var(--surface); position: relative; z-index: 50; }
 #hamburger { display: none; border: none; background: none; cursor: pointer; color: var(--muted); font-size: 20px; padding: 4px 6px; line-height: 1; }
 .logo { font-family: var(--mono); font-size: 14px; color: var(--accent); font-weight: 600; letter-spacing: 0.05em; }
 .tagline { font-size: 11px; color: var(--hint); }
 .spacer { flex: 1; }
 .nav-btn { padding: 5px 11px; border-radius: var(--radius); border: 0.5px solid var(--border-em); background: transparent; cursor: pointer; font-size: 11px; color: var(--muted); font-family: var(--sans); white-space: nowrap; }
 .nav-btn:hover { color: var(--accent); border-color: var(--accent); }
+#sync-status { font-size: 10px; color: var(--hint); display: flex; align-items: center; gap: 5px; }
+#sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--hint); flex-shrink: 0; }
+#sync-dot.ok { background: var(--success); }
+#sync-dot.saving { background: var(--accent); }
+#sync-dot.err { background: var(--danger); }
 
-/* ── Layout ── */
+/* layout */
 #layout { display: flex; flex: 1; overflow: hidden; position: relative; }
 
-/* ── Sidebar ── */
-#sidebar {
-  width: 280px; flex-shrink: 0;
-  border-right: 0.5px solid var(--border);
-  background: var(--surface);
-  display: flex; flex-direction: column;
-  overflow: hidden;
-  transition: transform 0.25s ease;
-}
+/* sidebar */
+#sidebar { width: 280px; flex-shrink: 0; border-right: 0.5px solid var(--border); background: var(--surface); display: flex; flex-direction: column; overflow: hidden; transition: transform 0.25s ease; }
 #search-wrap { padding: 10px 12px; border-bottom: 0.5px solid var(--border); }
 #search { width: 100%; padding: 8px 10px; border: 0.5px solid var(--border-em); border-radius: var(--radius); background: var(--card); color: var(--text); font-size: 13px; font-family: var(--sans); outline: none; }
 #search:focus { border-color: var(--accent); }
@@ -70,13 +49,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 #tree::-webkit-scrollbar { width: 3px; }
 #tree::-webkit-scrollbar-thumb { background: var(--border-em); border-radius: 2px; }
 
-/* tree nodes */
-.node { }
-.node-btn {
-  width: 100%; text-align: left; border: none; background: none; cursor: pointer;
-  display: flex; align-items: center; gap: 6px; color: var(--text);
-  transition: background .1s;
-}
+.node-btn { width: 100%; text-align: left; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text); transition: background .1s; }
 .node-btn:hover { background: var(--card); }
 .node-btn.active { background: var(--accent-dim); color: var(--accent-text); }
 .chevron { font-size: 9px; color: var(--hint); transition: transform .15s; display: inline-block; flex-shrink: 0; }
@@ -86,30 +59,25 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .node-badge { font-size: 10px; background: var(--card2); border: 0.5px solid var(--border); border-radius: 10px; padding: 1px 5px; color: var(--hint); flex-shrink: 0; margin-left: auto; }
 .node-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--hint); flex-shrink: 0; }
 .node-dot.filled { background: var(--accent); }
-
-/* level 1 */
 .lvl1 > .node-btn { padding: 8px 14px; font-size: 13px; font-weight: 500; }
-.lvl1 > .node-label-text { color: var(--muted); font-size: 11px; }
 .lvl1-children { display: none; }
 .lvl1.open > .lvl1-children { display: block; }
-
-/* level 2 */
 .lvl2 > .node-btn { padding: 6px 14px 6px 26px; font-size: 12px; }
 .lvl2-children { display: none; }
 .lvl2.open > .lvl2-children { display: block; }
-
-/* level 3 (leaf entries) */
 .lvl3 > .node-btn { padding: 5px 14px 5px 40px; font-size: 12px; color: var(--muted); }
 .lvl3 > .node-btn.active { color: var(--accent-text); }
-
 .btn-add-sec { width: 100%; text-align: left; border: none; background: none; cursor: pointer; padding: 10px 14px; font-size: 12px; color: var(--hint); display: flex; align-items: center; gap: 6px; border-top: 0.5px solid var(--border); }
 .btn-add-sec:hover { color: var(--accent); }
 #sidebar-footer { padding: 7px 14px; border-top: 0.5px solid var(--border); font-size: 10px; color: var(--hint); }
-
-/* ── Sidebar overlay ── */
+#sort-bar { padding: 6px 12px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+#sort-bar label { font-size: 10px; color: var(--hint); text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0; }
+.sort-btn { border: 0.5px solid var(--border); border-radius: var(--radius); background: none; cursor: pointer; font-size: 10px; color: var(--hint); padding: 3px 7px; font-family: var(--sans); white-space: nowrap; }
+.sort-btn:hover { color: var(--accent); border-color: var(--accent); }
+.sort-btn.active { color: var(--accent-text); border-color: var(--accent); background: var(--accent-dim); }
 #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 30; }
 
-/* ── Main ── */
+/* main */
 #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 #breadbar { padding: 9px 16px; border-bottom: 0.5px solid var(--border); background: var(--surface); display: flex; align-items: center; gap: 10px; flex-shrink: 0; min-height: 44px; }
 #breadcrumb { font-size: 12px; color: var(--hint); flex: 1; font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -121,31 +89,31 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 #content::-webkit-scrollbar { width: 4px; }
 #content::-webkit-scrollbar-thumb { background: var(--border-em); border-radius: 3px; }
 
-/* ── Welcome / folder view ── */
+/* welcome */
 #welcome { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 14px; opacity: 0.4; }
 #welcome .wicon { font-size: 36px; }
 #welcome p { font-size: 13px; color: var(--muted); text-align: center; max-width: 260px; line-height: 1.6; }
 
-.folder-view { }
+/* loading screen */
+#loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 200; }
+#loading-screen .l-logo { font-family: var(--mono); font-size: 20px; color: var(--accent); font-weight: 600; }
+#loading-screen .l-msg { font-size: 12px; color: var(--hint); }
+.spinner { width: 20px; height: 20px; border: 2px solid var(--border-em); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* folder */
 .folder-title { font-family: var(--mono); font-size: 20px; font-weight: 600; color: var(--accent-text); margin-bottom: 4px; }
 .folder-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
 .folder-actions { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
 .children-list { display: flex; flex-direction: column; gap: 6px; }
-.child-card {
-  background: var(--card); border: 0.5px solid var(--border);
-  border-radius: var(--radius); padding: 12px 16px;
-  display: flex; align-items: center; gap: 12px; cursor: pointer;
-  transition: border-color .15s;
-}
+.child-card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color .15s; }
 .child-card:hover { border-color: var(--border-em); }
 .child-card .c-id { font-family: var(--mono); font-size: 13px; color: var(--accent-text); flex-shrink: 0; min-width: 60px; }
 .child-card .c-title { font-size: 13px; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .child-card .c-meta { font-size: 11px; color: var(--hint); flex-shrink: 0; }
 .child-card .c-arrow { color: var(--hint); font-size: 12px; flex-shrink: 0; }
-.folder-del-btn { padding: 5px 12px; border-radius: var(--radius); border: 0.5px solid var(--border-em); background: var(--card); cursor: pointer; font-size: 11px; color: var(--muted); font-family: var(--sans); }
-.folder-del-btn:hover { color: var(--danger); border-color: var(--danger); }
 
-/* ── Entry ── */
+/* entry */
 .entry-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; gap: 10px; }
 .entry-id { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--accent-text); }
 .entry-title-disp { font-size: 13px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
@@ -155,7 +123,6 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .btn-sm.danger:hover { color: var(--danger); border-color: var(--danger); }
 .btn-sm.primary { color: var(--accent-text); border-color: var(--accent); background: var(--accent-dim); }
 .btn-sm.primary:hover { background: rgba(224,152,64,0.22); }
-
 .field-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--hint); margin-bottom: 7px; }
 .cmd-block { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 18px; font-family: var(--mono); font-size: 13px; line-height: 1.75; white-space: pre-wrap; word-break: break-all; color: var(--accent-text); position: relative; }
 .copy-btn { position: absolute; top: 8px; right: 8px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--card2); cursor: pointer; font-size: 11px; color: var(--hint); padding: 4px 10px; font-family: var(--sans); }
@@ -164,7 +131,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
 .tag { background: var(--tag-bg); color: var(--tag-text); font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
 
-/* ── Images ── */
+/* images */
 .images-section { margin-bottom: 18px; }
 .img-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
 .img-thumb { position: relative; border-radius: var(--radius); border: 0.5px solid var(--border); overflow: hidden; cursor: zoom-in; }
@@ -176,13 +143,13 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .img-drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .img-caption { font-size: 11px; color: var(--hint); margin-top: 4px; }
 
-/* ── Lightbox ── */
+/* lightbox */
 #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999; align-items: center; justify-content: center; padding: 16px; }
 #lightbox.open { display: flex; }
 #lightbox img { max-width: 100%; max-height: 100%; border-radius: var(--radius-lg); object-fit: contain; }
 #lightbox-close { position: fixed; top: 16px; right: 16px; background: var(--card2); border: 0.5px solid var(--border-em); border-radius: var(--radius); color: var(--muted); cursor: pointer; font-size: 13px; padding: 7px 14px; font-family: var(--sans); }
 
-/* ── Modal ── */
+/* modal */
 #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
 #overlay.open { display: flex; }
 .modal { background: var(--card); border: 0.5px solid var(--border-em); border-radius: var(--radius-lg); padding: 24px 22px 28px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; }
@@ -191,9 +158,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .modal h2 { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 18px; }
 .form-row { margin-bottom: 14px; }
 .form-row label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
-.form-row input, .form-row textarea, .form-row select { width: 100%; padding: 10px 12px; border: 0.5px solid var(--border-em); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 14px; font-family: var(--sans); outline: none; -webkit-appearance: none; }
+.form-row input, .form-row textarea { width: 100%; padding: 10px 12px; border: 0.5px solid var(--border-em); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 14px; font-family: var(--sans); outline: none; -webkit-appearance: none; }
 .form-row textarea { font-family: var(--mono); resize: vertical; min-height: 100px; line-height: 1.65; font-size: 13px; }
-.form-row input:focus, .form-row textarea:focus, .form-row select:focus { border-color: var(--accent); }
+.form-row input:focus, .form-row textarea:focus { border-color: var(--accent); }
 .form-hint { font-size: 11px; color: var(--hint); margin-top: 4px; }
 .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
 .btn-cancel { padding: 10px 18px; border-radius: var(--radius); border: 0.5px solid var(--border-em); background: transparent; cursor: pointer; font-size: 13px; color: var(--muted); font-family: var(--sans); }
@@ -204,14 +171,14 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 .empty-msg { text-align: center; padding: 50px 20px; color: var(--hint); font-size: 13px; }
 .empty-msg .hint2 { font-size: 11px; margin-top: 6px; }
 
-/* ── Toast ── */
 #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--card2); border: 0.5px solid var(--accent); border-radius: var(--radius); padding: 8px 18px; font-size: 12px; color: var(--accent-text); z-index: 9999; opacity: 0; transition: opacity .25s; pointer-events: none; white-space: nowrap; }
 #toast.show { opacity: 1; }
 
-/* ── Mobile ── */
+/* mobile */
 @media (max-width: 640px) {
   #hamburger { display: block; }
   .tagline { display: none; }
+  #sync-label { display: none; }
   #sidebar { position: fixed; left: 0; top: var(--nav-h); bottom: 0; z-index: 40; transform: translateX(-100%); width: min(300px, 85vw); box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
   #sidebar.open { transform: translateX(0); }
   #sidebar-overlay { display: block; opacity: 0; pointer-events: none; transition: opacity .25s; }
@@ -225,13 +192,20 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 </head>
 <body>
 
+<div id="loading-screen">
+  <div class="l-logo">⌨ cmdref</div>
+  <div class="spinner"></div>
+  <div class="l-msg">Connecting to database…</div>
+</div>
+
 <div id="topnav">
   <button id="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
   <span class="logo">⌨ cmdref</span>
   <span class="tagline">command reference</span>
   <div class="spacer"></div>
-  <button class="nav-btn" onclick="importData()">↑ Import</button>
-  <button class="nav-btn" onclick="exportData()">↓ Export</button>
+  <div id="sync-status"><div id="sync-dot"></div><span id="sync-label">–</span></div>
+  <button class="nav-btn desktop-only" onclick="importData()">↑ Import</button>
+  <button class="nav-btn desktop-only" onclick="exportData()">↓ Export</button>
 </div>
 
 <div id="layout">
@@ -240,11 +214,17 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
     <div id="search-wrap">
       <input id="search" type="text" placeholder="Search…" oninput="filterTree(this.value)" />
     </div>
+    <div id="sort-bar">
+      <label>Sort:</label>
+      <button class="sort-btn active" onclick="setSort('created')" id="sb-created">Created</button>
+      <button class="sort-btn" onclick="setSort('modified')" id="sb-modified">Modified</button>
+      <button class="sort-btn" onclick="setSort('alpha')" id="sb-alpha">A–Z</button>
+      <button class="sort-btn" onclick="setSort('dir')" id="sb-dir">↑↓</button>
+    </div>
     <div id="tree"></div>
-    <button class="btn-add-sec desktop-only" onclick="openAddNodeModal(null,0)" style="border-top:0.5px solid var(--border);">＋ Add section</button>
+    <button class="btn-add-sec desktop-only" onclick="openAddNodeModal(null,0)">＋ Add section</button>
     <div id="sidebar-footer"></div>
   </div>
-
   <div id="main">
     <div id="breadbar">
       <div id="breadcrumb">select a task</div>
@@ -268,51 +248,102 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); disp
 <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)" />
 
 <script>
-const STORAGE_KEY = 'cmdref_v3';
+/* ── Supabase config ── */
+const SB_URL = 'https://raakpyeidaavvfevfpjm.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhYWtweWVpZGFhdnZmZXZmcGptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODMxODQsImV4cCI6MjA4OTg1OTE4NH0.Zg-ZeBbOZRrSKQFK0jrBEWrgtU0Hw7LpvZFffYw3NDk';
+const DB_ROW  = 'main'; // single row key storing entire tree
 
-/* ── Data model ──
-  db.sections = [
-    { id:'5', title:'...', children:[
-      { id:'5.1', title:'...', children:[
-        { id:'5.1.1', title:'...', commands:'', notes:'', tags:[], images:[] },
-        ...
-      ]},
-      ...
-    ]},
-    ...
-  ]
-  Leaves (depth 2, 0-indexed) are entries with commands/notes/images.
-  Branches (depth 0,1) have children[].
-*/
-
-function loadData() {
-  try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : seedData(); }
-  catch { return seedData(); }
-}
-function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
-function seedData() {
-  return { sections: [{
-    id:'5', title:'Sample Domain',
-    children:[{
-      id:'5.1', title:'Example Section',
-      children:[{
-        id:'5.1.1', title:'Verify device baseline',
-        commands:'show version\nshow ip interface brief\nshow running-config',
-        notes:'Run these before making any changes to establish baseline state.',
-        tags:['verification','baseline'], images:[]
-      }]
-    }]
-  }]};
+async function sbFetch(path, opts={}) {
+  const res = await fetch(`${SB_URL}/rest/v1${path}`, {
+    ...opts,
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': `Bearer ${SB_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || '',
+      ...opts.headers
+    }
+  });
+  if (!res.ok) { const t = await res.text(); throw new Error(t); }
+  const ct = res.headers.get('content-type')||'';
+  return ct.includes('json') ? res.json() : null;
 }
 
-let db = loadData();
-let activePath = []; // array of ids, e.g. ['5','5.1','5.1.1']
+/* ── Load / Save ── */
+async function loadFromDB() {
+  const rows = await sbFetch(`/entries?id=eq.${DB_ROW}&select=data`);
+  if (rows && rows.length > 0) return rows[0].data;
+  return { sections: [] };
+}
+
+let saveTimer = null;
+function persist() {
+  setSyncStatus('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      await sbFetch('/entries', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ id: DB_ROW, data: db, updated_at: new Date().toISOString() })
+      });
+      setSyncStatus('ok');
+    } catch(e) {
+      setSyncStatus('err');
+      showToast('Save failed — check connection');
+    }
+  }, 600);
+}
+
+function setSyncStatus(state) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = state;
+  lbl.textContent = state === 'ok' ? 'saved' : state === 'saving' ? 'saving…' : 'error';
+}
+
+/* ── App state ── */
+let db = { sections: [] };
+let activePath = [];
 let filterText = '';
-let openNodes = new Set(); // ids of open branch nodes
+let openNodes = new Set();
+let sortMode = 'created'; // created | modified | alpha | dir
+let sortAsc = true;
 
-function persist() { saveData(db); }
+function setSort(mode) {
+  if (sortMode === mode) { sortAsc = !sortAsc; }
+  else { sortMode = mode; sortAsc = true; }
+  ['created','modified','alpha','dir'].forEach(m => {
+    const btn = document.getElementById('sb-'+m);
+    if (btn) btn.className = 'sort-btn' + (m===sortMode?' active':'');
+  });
+  // Update dir button label
+  const dirBtn = document.getElementById('sb-dir');
+  if (dirBtn) dirBtn.textContent = sortAsc ? '↑ Asc' : '↓ Desc';
+  renderTree();
+}
 
-/* ── Node finders ── */
+function sortNodes(nodes) {
+  const arr = [...nodes];
+  arr.sort((a, b) => {
+    let cmp = 0;
+    if (sortMode === 'alpha') {
+      cmp = (a.id||'').localeCompare(b.id||'', undefined, {numeric:true});
+    } else if (sortMode === 'modified') {
+      cmp = (a.updatedAt||a.createdAt||'').localeCompare(b.updatedAt||b.createdAt||'');
+    } else if (sortMode === 'created') {
+      cmp = (a.createdAt||'').localeCompare(b.createdAt||'');
+    } else {
+      // 'dir' just reverses creation order
+      cmp = (a.createdAt||'').localeCompare(b.createdAt||'');
+    }
+    return sortAsc ? cmp : -cmp;
+  });
+  return arr;
+}
+
+/* ── Tree helpers ── */
 function findNode(id, nodes) {
   for (const n of nodes) {
     if (n.id === id) return n;
@@ -340,18 +371,18 @@ function countLeaves(node) {
   return (node.children||[]).reduce((a,c)=>a+countLeaves(c),0);
 }
 function totalLeaves() { return db.sections.reduce((a,c)=>a+countLeaves(c),0); }
-
-// Collect every title in the tree (lowercased) for uniqueness checks, optionally excluding one id
 function allTitles(excludeId) {
   const titles = [];
-  function walk(nodes) {
-    nodes.forEach(n => {
-      if (n.id !== excludeId) titles.push(n.title.trim().toLowerCase());
-      if (n.children) walk(n.children);
-    });
+  function walk(nodes) { nodes.forEach(n => { if (n.id !== excludeId) titles.push(n.title.trim().toLowerCase()); if (n.children) walk(n.children); }); }
+  walk(db.sections); return titles;
+}
+function buildBreadcrumbParts(targetId, nodes=db.sections, path=[]) {
+  for (const n of nodes) {
+    const cur = [...path, {id:n.id,title:n.title}];
+    if (n.id === targetId) return cur;
+    if (n.children) { const r = buildBreadcrumbParts(targetId, n.children, cur); if (r) return r; }
   }
-  walk(db.sections);
-  return titles;
+  return null;
 }
 
 /* ── Tree render ── */
@@ -362,116 +393,71 @@ function renderTree() {
 
   function nodeMatches(n) {
     if (isLeaf(n)) return !q || n.id.includes(q) || n.title.toLowerCase().includes(q) || (n.commands||'').toLowerCase().includes(q);
-    return (n.children||[]).some(c => nodeMatches(c));
+    return (n.children||[]).some(c=>nodeMatches(c));
   }
 
-  // Returns a DOM element for a node at given depth, or null if filtered out.
   function buildNode(node, depth) {
     if (q && !nodeMatches(node)) return null;
     const leaf = isLeaf(node);
     const isOpen = q ? true : openNodes.has(node.id);
     const isActive = leaf
-      ? activePath[activePath.length - 1] === node.id
-      : activePath.includes(node.id) && activePath[activePath.length - 1] === node.id;
+      ? activePath[activePath.length-1] === node.id
+      : activePath.includes(node.id) && activePath[activePath.length-1] === node.id;
 
     const wrap = document.createElement('div');
-    wrap.className = `node lvl${depth + 1}` + (!leaf && isOpen ? ' open' : '');
+    wrap.className = `node lvl${depth+1}` + (!leaf && isOpen ? ' open' : '');
 
-    // Button
     const btn = document.createElement('button');
     btn.className = 'node-btn' + (isActive ? ' active' : '');
 
     if (!leaf) {
-      const chev = document.createElement('span');
-      chev.className = 'chevron'; chev.textContent = '▶';
-      btn.appendChild(chev);
+      const chev = document.createElement('span'); chev.className='chevron'; chev.textContent='▶'; btn.appendChild(chev);
     } else {
-      const dot = document.createElement('span');
-      dot.className = 'node-dot' + (node.commands || node.images?.length ? ' filled' : '');
-      btn.appendChild(dot);
+      const dot = document.createElement('span'); dot.className='node-dot'+(node.commands||node.images?.length?' filled':''); btn.appendChild(dot);
     }
-
-    const idSpan = document.createElement('span');
-    idSpan.className = 'node-id';
-    idSpan.style.fontSize = depth === 0 ? '13px' : depth === 1 ? '12px' : '11px';
-    idSpan.textContent = node.id;
-    btn.appendChild(idSpan);
-
-    const labelSpan = document.createElement('span');
-    labelSpan.className = 'node-label';
-    labelSpan.style.cssText = 'font-size:11px;color:var(--hint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
-    labelSpan.textContent = node.title;
-    btn.appendChild(labelSpan);
-
-    if (!leaf) {
-      const badge = document.createElement('span');
-      badge.className = 'node-badge';
-      badge.textContent = countLeaves(node);
-      btn.appendChild(badge);
-    }
+    const idSpan = document.createElement('span'); idSpan.className='node-id'; idSpan.style.fontSize=depth===0?'13px':'12px'; idSpan.textContent=node.id; btn.appendChild(idSpan);
+    const lblSpan = document.createElement('span'); lblSpan.className='node-label'; lblSpan.style.cssText='font-size:11px;color:var(--hint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'; lblSpan.textContent=node.title; btn.appendChild(lblSpan);
+    if (!leaf) { const badge=document.createElement('span'); badge.className='node-badge'; badge.textContent=countLeaves(node); btn.appendChild(badge); }
 
     btn.onclick = () => {
-      if (leaf) {
-        selectEntry(node.id); closeSidebar();
-      } else {
-        if (openNodes.has(node.id)) openNodes.delete(node.id);
-        else openNodes.add(node.id);
-        activePath = buildBreadcrumbParts(node.id)?.map(p => p.id) || [node.id];
+      if (leaf) { selectEntry(node.id); closeSidebar(); }
+      else {
+        if (openNodes.has(node.id)) openNodes.delete(node.id); else openNodes.add(node.id);
+        activePath = buildBreadcrumbParts(node.id)?.map(p=>p.id) || [node.id];
         renderTree(); showFolderView(node.id);
       }
     };
     wrap.appendChild(btn);
 
-    // Children container — only for branch nodes
     if (!leaf && node.children) {
-      const childContainer = document.createElement('div');
-      childContainer.className = `lvl${depth + 1}-children`;
-      node.children.forEach(child => {
-        const childEl = buildNode(child, depth + 1);
-        if (childEl) childContainer.appendChild(childEl);
-      });
-      wrap.appendChild(childContainer);
+      const cc = document.createElement('div'); cc.className=`lvl${depth+1}-children`;
+      sortNodes(node.children).forEach(child => { const el=buildNode(child,depth+1); if(el) cc.appendChild(el); });
+      wrap.appendChild(cc);
     }
-
     return wrap;
   }
 
-  db.sections.forEach(sec => {
-    const el = buildNode(sec, 0);
-    if (el) tree.appendChild(el);
-  });
-
+  sortNodes(db.sections).forEach(sec => { const el=buildNode(sec,0); if(el) tree.appendChild(el); });
   const sf = document.getElementById('sidebar-footer');
   if (sf) sf.textContent = `${db.sections.length} sections · ${totalLeaves()} tasks`;
 }
 
 /* ── Folder view ── */
 function showFolderView(nodeId) {
-  const node = findNode(nodeId, db.sections);
-  if (!node || isLeaf(node)) return;
+  const node = findNode(nodeId, db.sections); if (!node||isLeaf(node)) return;
   const depth = getDepth(nodeId, db.sections);
-  const content = document.getElementById('content');
-  const bc = document.getElementById('breadcrumb');
-  const btnAdd = document.getElementById('btn-add-entry');
-
-  // build breadcrumb
   const parts = buildBreadcrumbParts(nodeId);
-  bc.innerHTML = parts.map((p,i)=> i<parts.length-1
-    ? `<span style="cursor:pointer;color:var(--muted)" onclick="showFolderView('${esc(p.id)}')">${esc(p.id)}</span> <span style="color:var(--hint);margin:0 4px;">/</span>`
+  document.getElementById('breadcrumb').innerHTML = parts.map((p,i)=>
+    i<parts.length-1 ? `<span style="cursor:pointer;color:var(--muted)" onclick="showFolderView('${esc(p.id)}')">${esc(p.id)}</span> <span style="color:var(--hint);margin:0 4px;">/</span>`
     : `<span class="hi">${esc(p.id)}</span>`
   ).join('');
-  btnAdd.style.display = 'none';
+  document.getElementById('btn-add-entry').style.display='none';
 
-
-
-  const childItems = (node.children||[]).map(c => {
+  const childItems = sortNodes(node.children||[]).map(c => {
     const meta = isLeaf(c) ? (c.tags||[]).slice(0,2).join(', ')||'' : `${countLeaves(c)} tasks`;
     return `<div class="child-card" onclick="${isLeaf(c)?`selectEntry('${esc(c.id)}')`:`showFolderView('${esc(c.id)}')`}">
-      <span class="c-id">${esc(c.id)}</span>
-      <span class="c-title">${esc(c.title)}</span>
-      <span class="c-meta">${esc(meta)}</span>
-      <span class="c-arrow">›</span>
-    </div>`;
+      <span class="c-id">${esc(c.id)}</span><span class="c-title">${esc(c.title)}</span>
+      <span class="c-meta">${esc(meta)}</span><span class="c-arrow">›</span></div>`;
   }).join('');
 
   const addBtns = [
@@ -481,365 +467,263 @@ function showFolderView(nodeId) {
     `<button class="btn-sm danger desktop-only" onclick="deleteNode('${esc(nodeId)}')">Delete</button>`
   ].join('');
 
-  content.innerHTML = `
+  document.getElementById('content').innerHTML = `
     <div class="folder-view">
       <div class="folder-title">${esc(node.id)}</div>
       <div class="folder-subtitle">${esc(node.title)}</div>
       <div class="folder-actions">${addBtns}</div>
-      <div class="children-list">${childItems || '<div class="empty-msg" style="padding:20px 0;">No items yet.<div class="hint2">Use the buttons above to add content.</div></div>'}</div>
-    </div>
-  `;
-}
-
-function buildBreadcrumbParts(targetId, nodes=db.sections, path=[]) {
-  for (const n of nodes) {
-    const cur = [...path, {id:n.id,title:n.title}];
-    if (n.id === targetId) return cur;
-    if (n.children) { const r = buildBreadcrumbParts(targetId, n.children, cur); if (r) return r; }
-  }
-  return null;
+      <div class="children-list">${childItems||'<div class="empty-msg" style="padding:20px 0;">No items yet.<div class="hint2">Use the buttons above to add content.</div></div>'}</div>
+    </div>`;
 }
 
 /* ── Entry view ── */
 function selectEntry(entryId) {
-  const node = findNode(entryId, db.sections);
-  if (!node) return;
+  const node = findNode(entryId, db.sections); if (!node) return;
   activePath = buildBreadcrumbParts(entryId).map(p=>p.id);
-  openNodes.add(activePath[0]);
-  if (activePath[1]) openNodes.add(activePath[1]);
-  renderTree();
-  renderEntry(entryId);
+  openNodes.add(activePath[0]); if (activePath[1]) openNodes.add(activePath[1]);
+  renderTree(); renderEntry(entryId);
 }
 
 function renderEntry(entryId) {
-  const entry = findNode(entryId, db.sections);
-  if (!entry) return;
-  const content = document.getElementById('content');
-  const bc = document.getElementById('breadcrumb');
-  const btnAdd = document.getElementById('btn-add-entry');
-
+  const entry = findNode(entryId, db.sections); if (!entry) return;
   const parts = buildBreadcrumbParts(entryId);
-  bc.innerHTML = parts.map((p,i)=> i<parts.length-1
-    ? `<span style="cursor:pointer;color:var(--muted)" onclick="showFolderView('${esc(p.id)}')">${esc(p.id)}</span> <span style="color:var(--hint);margin:0 4px;">/</span>`
+  document.getElementById('breadcrumb').innerHTML = parts.map((p,i)=>
+    i<parts.length-1 ? `<span style="cursor:pointer;color:var(--muted)" onclick="showFolderView('${esc(p.id)}')">${esc(p.id)}</span> <span style="color:var(--hint);margin:0 4px;">/</span>`
     : `<span class="hi">${esc(p.id)}</span>`
   ).join('');
-  btnAdd.style.display = 'none';
+  document.getElementById('btn-add-entry').style.display='none';
 
-  const hasCmds = entry.commands && entry.commands.trim();
-  const hasNotes = entry.notes && entry.notes.trim();
-  const imgs = entry.images || [];
+  const hasCmds = entry.commands?.trim();
+  const hasNotes = entry.notes?.trim();
+  const imgs = entry.images||[];
 
-  content.innerHTML = `
+  document.getElementById('content').innerHTML = `
     <div class="entry-header">
-      <div style="min-width:0;">
-        <div class="entry-id">${esc(entry.id)}</div>
-        <div class="entry-title-disp">${esc(entry.title)}</div>
-      </div>
+      <div style="min-width:0;"><div class="entry-id">${esc(entry.id)}</div><div class="entry-title-disp">${esc(entry.title)}</div></div>
       <div class="entry-actions desktop-only">
         <button class="btn-sm primary" onclick="openEditEntryModal('${esc(entryId)}')">Edit</button>
         <button class="btn-sm danger" onclick="deleteNode('${esc(entryId)}')">Delete</button>
       </div>
     </div>
-
-    ${(entry.tags||[]).length ? `<div class="tags-row">${entry.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
-
-    ${hasCmds ? `
-      <div class="field-label">Commands</div>
-      <div class="cmd-block">${esc(entry.commands)}<button class="copy-btn" onclick="copyCmd('${esc(entryId)}',this)">copy</button></div>
-    ` : ''}
-
-    ${hasNotes ? `
-      <div class="field-label">Notes</div>
-      <div class="notes-block">${esc(entry.notes)}</div>
-    ` : ''}
-
+    ${(entry.tags||[]).length?`<div class="tags-row">${entry.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}
+    ${hasCmds?`<div class="field-label">Commands</div><div class="cmd-block">${esc(entry.commands)}<button class="copy-btn" onclick="copyCmd('${esc(entryId)}',this)">copy</button></div>`:''}
+    ${hasNotes?`<div class="field-label">Notes</div><div class="notes-block">${esc(entry.notes)}</div>`:''}
     <div class="images-section">
       <div class="field-label">Diagrams / Images</div>
       <div class="img-grid" id="img-grid-${esc(entryId)}">
-        ${imgs.map((img,i)=>`
-          <div class="img-thumb">
-            <img src="${img.data}" alt="${esc(img.name||'diagram')}" onclick="openLightbox('${esc(entryId)}',${i})" />
-            <button class="img-del desktop-only" onclick="deleteImage('${esc(entryId)}',${i})">✕</button>
-          </div>
-        `).join('')}
+        ${imgs.map((img,i)=>`<div class="img-thumb"><img src="${img.data}" alt="${esc(img.name||'')}" onclick="openLightbox('${esc(entryId)}',${i})"/><button class="img-del desktop-only" onclick="deleteImage('${esc(entryId)}',${i})">✕</button></div>`).join('')}
       </div>
-      <div class="img-drop-zone desktop-only" id="drop-${esc(entryId)}"
-        ondragover="event.preventDefault();this.classList.add('drag-over')"
-        ondragleave="this.classList.remove('drag-over')"
-        ondrop="handleDrop(event,'${esc(entryId)}')">
-        <input type="file" accept="image/*" multiple onchange="handleFileInput(event,'${esc(entryId)}')" />
+      <div class="img-drop-zone desktop-only" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event,'${esc(entryId)}')">
+        <input type="file" accept="image/*" multiple onchange="handleFileInput(event,'${esc(entryId)}')"/>
         <div>📎 Drop images here or click to upload</div>
         <div class="img-caption">PNG · JPG · SVG · WEBP — or paste from clipboard (Ctrl+V)</div>
       </div>
     </div>
-
-    ${!hasCmds && !hasNotes && !imgs.length ? `<div class="empty-msg">No content yet.<div class="hint2">Click Edit to add commands and notes.</div></div>` : ''}
+    ${!hasCmds&&!hasNotes&&!imgs.length?'<div class="empty-msg">No content yet.<div class="hint2">Click Edit to add commands and notes.</div></div>':''}
   `;
-  content.scrollTop = 0;
+  document.getElementById('content').scrollTop=0;
 }
 
 function copyCmd(entryId, btn) {
-  const entry = findNode(entryId, db.sections);
-  if (!entry?.commands) return;
-  navigator.clipboard.writeText(entry.commands).then(() => {
-    btn.textContent = 'copied ✓'; btn.style.color = 'var(--success)';
-    setTimeout(()=>{ btn.textContent='copy'; btn.style.color=''; }, 2000);
-  }).catch(() => {
-    const ta = document.createElement('textarea'); ta.value = entry.commands;
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    showToast('Copied ✓');
-  });
+  const entry = findNode(entryId, db.sections); if (!entry?.commands) return;
+  navigator.clipboard.writeText(entry.commands).then(()=>{
+    btn.textContent='copied ✓'; btn.style.color='var(--success)';
+    setTimeout(()=>{btn.textContent='copy';btn.style.color='';},2000);
+  }).catch(()=>{ const ta=document.createElement('textarea');ta.value=entry.commands;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('Copied ✓'); });
 }
 
 /* ── Images ── */
-function handleDrop(e, entryId) { e.preventDefault(); document.getElementById(`drop-${entryId}`)?.classList.remove('drag-over'); processImages(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')), entryId); }
-function handleFileInput(e, entryId) { processImages(Array.from(e.target.files), entryId); }
-function processImages(files, entryId) {
-  const entry = findNode(entryId, db.sections); if (!entry||!files.length) return;
-  if (!entry.images) entry.images = [];
-  let pending = files.length;
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      entry.images.push({name:file.name, data:ev.target.result});
-      if (--pending===0) { persist(); renderEntry(entryId); showToast('Image added ✓'); }
-    };
+function handleDrop(e,entryId){e.preventDefault();e.currentTarget.classList.remove('drag-over');processImages(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')),entryId);}
+function handleFileInput(e,entryId){processImages(Array.from(e.target.files),entryId);}
+function processImages(files,entryId){
+  const entry=findNode(entryId,db.sections);if(!entry||!files.length)return;
+  if(!entry.images)entry.images=[];
+  let pending=files.length;
+  files.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{entry.images.push({name:file.name,data:ev.target.result});if(--pending===0){persist();renderEntry(entryId);showToast('Image saved ✓');}};
     reader.readAsDataURL(file);
   });
 }
-function deleteImage(entryId, idx) {
-  if (!confirm('Remove this image?')) return;
-  const entry = findNode(entryId, db.sections); if (!entry?.images) return;
-  entry.images.splice(idx,1); persist(); renderEntry(entryId);
+function deleteImage(entryId,idx){
+  if(!confirm('Remove this image?'))return;
+  const entry=findNode(entryId,db.sections);if(!entry?.images)return;
+  entry.images.splice(idx,1);persist();renderEntry(entryId);
 }
 
 /* ── Lightbox ── */
-function openLightbox(entryId, idx) {
-  const img = findNode(entryId, db.sections)?.images?.[idx]; if (!img) return;
-  document.getElementById('lightbox-img').src = img.data;
-  document.getElementById('lightbox').classList.add('open');
-}
-function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+function openLightbox(entryId,idx){const img=findNode(entryId,db.sections)?.images?.[idx];if(!img)return;document.getElementById('lightbox-img').src=img.data;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
 
 /* ── Paste ── */
-document.addEventListener('paste', e => {
-  const entryId = activePath[activePath.length-1]; if (!entryId) return;
-  const entry = findNode(entryId, db.sections); if (!entry||!isLeaf(entry)) return;
-  const items = Array.from(e.clipboardData.items).filter(it=>it.type.startsWith('image/')); if (!items.length) return;
-  if (!entry.images) entry.images = [];
-  let pending = items.length;
-  items.forEach(item => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      entry.images.push({name:`pasted-${Date.now()}.png`, data:ev.target.result});
-      if (--pending===0) { persist(); renderEntry(entryId); showToast('Image pasted ✓'); }
-    };
-    reader.readAsDataURL(item.getAsFile());
-  });
+document.addEventListener('paste',e=>{
+  const entryId=activePath[activePath.length-1];if(!entryId)return;
+  const entry=findNode(entryId,db.sections);if(!entry||!isLeaf(entry))return;
+  const items=Array.from(e.clipboardData.items).filter(it=>it.type.startsWith('image/'));if(!items.length)return;
+  if(!entry.images)entry.images=[];
+  let pending=items.length;
+  items.forEach(item=>{const reader=new FileReader();reader.onload=ev=>{entry.images.push({name:`pasted-${Date.now()}.png`,data:ev.target.result});if(--pending===0){persist();renderEntry(entryId);showToast('Image pasted & saved ✓');}};reader.readAsDataURL(item.getAsFile());});
 });
 
 /* ── Filter ── */
-function filterTree(q) { filterText = q; renderTree(); }
+function filterTree(q){filterText=q;renderTree();}
 
-/* ── Sidebar toggle ── */
-function toggleSidebar() { const sb=document.getElementById('sidebar'),ov=document.getElementById('sidebar-overlay'); const o=sb.classList.toggle('open'); ov.classList.toggle('open',o); }
-function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('open'); }
+/* ── Sidebar ── */
+function toggleSidebar(){const sb=document.getElementById('sidebar'),ov=document.getElementById('sidebar-overlay');const o=sb.classList.toggle('open');ov.classList.toggle('open',o);}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('open');}
 
-/* ── Modals: add section/subsection ── */
-function openAddNodeModal(parentId, depth) {
-  // depth: 0=top-level section, 1=subsection under parentId, 2=sub-subsection
-  const parent = parentId ? findNode(parentId, db.sections) : null;
-  const levelName = depth===0?'section':depth===1?'subsection':'sub-subsection';
-  const suggestId = parentId ? `${parentId}.${(parent?.children||[]).length+1}` : `${db.sections.length+1}`;
+/* ── Add section/subsection ── */
+function openAddNodeModal(parentId,depth){
+  const parent=parentId?findNode(parentId,db.sections):null;
+  const levelName=depth===0?'section':'subsection';
   showModal(`
     <h2>Add ${levelName}${parent?` under <span style="color:var(--accent-text);font-family:var(--mono)">${esc(parent.id)}</span>`:''}</h2>
-    <div class="form-row"><label>ID</label><input id="f-nid" value="${esc(suggestId)}" /><div class="form-hint">e.g. ${esc(suggestId)}</div></div>
-    <div class="form-row"><label>Title</label><input id="f-ntitle" placeholder="Descriptive name" /></div>
-    <div class="form-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" onclick="submitAddNode('${esc(parentId||'')}',${depth})">Add</button>
-    </div>
+    <div class="form-row"><label>ID</label><input id="f-nid" placeholder="e.g. 5.1 or ASA-VPN"/></div>
+    <div class="form-row"><label>Title</label><input id="f-ntitle" placeholder="Descriptive name"/></div>
+    <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancel</button><button class="btn-save" onclick="submitAddNode('${esc(parentId||'')}',${depth})">Add</button></div>
   `);
 }
-
-function submitAddNode(parentId, depth) {
-  const id = document.getElementById('f-nid').value.trim();
-  const title = document.getElementById('f-ntitle').value.trim();
-  if (!id) { alert('ID is required'); return; }
-  if (findNode(id, db.sections)) { alert('That ID already exists. Please use a different one.'); return; }
-  if (title && allTitles().includes(title.toLowerCase())) { alert(`"${title}" is already used. Please use a unique title.`); return; }
-  const newNode = { id, title: title||id, children:[] };
-  if (!parentId) {
-    db.sections.push(newNode);
-    db.sections.sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}));
-  } else {
-    const parent = findNode(parentId, db.sections);
-    if (!parent) { alert('Parent not found'); return; }
-    if (!parent.children) parent.children = [];
-    parent.children.push(newNode);
-    parent.children.sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}));
-  }
-  persist(); closeModal(); openNodes.add(id); if (parentId) openNodes.add(parentId);
-  activePath = parentId ? [parentId, id] : [id];
-  renderTree(); showFolderView(id);
+function submitAddNode(parentId,depth){
+  const id=document.getElementById('f-nid').value.trim();
+  const title=document.getElementById('f-ntitle').value.trim();
+  if(!id){alert('ID is required');return;}
+  if(findNode(id,db.sections)){alert('That ID already exists.');return;}
+  if(title&&allTitles().includes(title.toLowerCase())){alert(`"${title}" is already used. Please use a unique title.`);return;}
+  const now=new Date().toISOString();
+  const newNode={id,title:title||id,children:[],createdAt:now,updatedAt:now};
+  if(!parentId){db.sections.push(newNode);}
+  else{const parent=findNode(parentId,db.sections);if(!parent){alert('Parent not found');return;}if(!parent.children)parent.children=[];parent.children.push(newNode);}
+  persist();closeModal();openNodes.add(id);if(parentId)openNodes.add(parentId);
+  activePath=parentId?[parentId,id]:[id];
+  renderTree();showFolderView(id);
 }
 
-/* ── Add entry under a node ── */
-function openAddEntryModalUnder(parentId) {
-  const parent = findNode(parentId, db.sections);
-  const sug = `${parentId}.${(parent?.children||[]).length+1}`;
+/* ── Add task ── */
+function openAddEntryModalUnder(parentId){
   showModal(`
     <h2>Add task under <span style="color:var(--accent-text);font-family:var(--mono)">${esc(parentId)}</span></h2>
-    <div class="form-row"><label>Task ID</label><input id="f-id" value="${esc(sug)}" /></div>
-    <div class="form-row"><label>Title</label><input id="f-title" placeholder="Brief description" /></div>
+    <div class="form-row"><label>Task ID</label><input id="f-id" placeholder="e.g. 5.1.1 or ASA-NAT-1"/></div>
+    <div class="form-row"><label>Title</label><input id="f-title" placeholder="Brief description"/></div>
     <div class="form-row"><label>Commands</label><textarea id="f-cmds" placeholder="Paste or type CLI commands…" rows="6"></textarea></div>
     <div class="form-row"><label>Notes</label><textarea id="f-notes" placeholder="Context, caveats, gotchas…" rows="3"></textarea></div>
-    <div class="form-row"><label>Tags (comma-separated)</label><input id="f-tags" placeholder="vpn, ipsec, phase1" /></div>
-    <div class="form-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" onclick="submitAddEntry('${esc(parentId)}')">Save</button>
-    </div>
+    <div class="form-row"><label>Tags (comma-separated)</label><input id="f-tags" placeholder="vpn, ipsec, phase1"/></div>
+    <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancel</button><button class="btn-save" onclick="submitAddEntry('${esc(parentId)}')">Save</button></div>
   `);
 }
-function openAddEntryModal() {
-  // called from breadbar when inside a section
-  const parentId = activePath[activePath.length-1];
-  if (parentId) openAddEntryModalUnder(parentId);
-}
-function submitAddEntry(parentId) {
-  const parent = findNode(parentId, db.sections);
-  const id = document.getElementById('f-id').value.trim();
-  const title = document.getElementById('f-title').value.trim();
-  if (!id) { alert('Task ID required'); return; }
-  if (findNode(id, db.sections)) { alert('That ID already exists. Please use a different one.'); return; }
-  if (title && allTitles().includes(title.toLowerCase())) { alert(`"${title}" is already used. Please use a unique title.`); return; }
-  const entry = {
-    id, title: document.getElementById('f-title').value.trim()||id,
-    commands: document.getElementById('f-cmds').value.trim(),
-    notes: document.getElementById('f-notes').value.trim(),
-    tags: document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
-    images: []
-  };
-  if (!parent.children) parent.children = [];
+function openAddEntryModal(){const parentId=activePath[activePath.length-1];if(parentId)openAddEntryModalUnder(parentId);}
+function submitAddEntry(parentId){
+  const parent=findNode(parentId,db.sections);
+  const id=document.getElementById('f-id').value.trim();
+  const title=document.getElementById('f-title').value.trim();
+  if(!id){alert('Task ID required');return;}
+  if(findNode(id,db.sections)){alert('That ID already exists.');return;}
+  if(title&&allTitles().includes(title.toLowerCase())){alert(`"${title}" is already used. Please use a unique title.`);return;}
+  const now=new Date().toISOString();
+  const entry={id,title:title||id,commands:document.getElementById('f-cmds').value.trim(),notes:document.getElementById('f-notes').value.trim(),tags:document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean),images:[],createdAt:now,updatedAt:now};
+  if(!parent.children)parent.children=[];
   parent.children.push(entry);
-  parent.children.sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}));
-  persist(); closeModal(); openNodes.add(parentId);
-  activePath = [...buildBreadcrumbParts(parentId).map(p=>p.id), id];
-  renderTree(); renderEntry(id);
+  persist();closeModal();openNodes.add(parentId);
+  activePath=[...buildBreadcrumbParts(parentId).map(p=>p.id),id];
+  renderTree();renderEntry(id);
 }
 
 /* ── Edit entry ── */
-function openEditEntryModal(entryId) {
-  const entry = findNode(entryId, db.sections); if (!entry) return;
+function openEditEntryModal(entryId){
+  const entry=findNode(entryId,db.sections);if(!entry)return;
   showModal(`
     <h2>Edit <span style="color:var(--accent-text);font-family:var(--mono)">${esc(entry.id)}</span></h2>
-    <div class="form-row"><label>Title</label><input id="f-title" value="${esc(entry.title)}" /></div>
+    <div class="form-row"><label>Title</label><input id="f-title" value="${esc(entry.title)}"/></div>
     <div class="form-row"><label>Commands</label><textarea id="f-cmds" rows="8">${esc(entry.commands||'')}</textarea></div>
     <div class="form-row"><label>Notes</label><textarea id="f-notes" rows="4">${esc(entry.notes||'')}</textarea></div>
-    <div class="form-row"><label>Tags (comma-separated)</label><input id="f-tags" value="${esc((entry.tags||[]).join(', '))}" /></div>
-    <div class="form-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" onclick="submitEditEntry('${esc(entryId)}')">Save</button>
-    </div>
+    <div class="form-row"><label>Tags (comma-separated)</label><input id="f-tags" value="${esc((entry.tags||[]).join(', '))}"/></div>
+    <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancel</button><button class="btn-save" onclick="submitEditEntry('${esc(entryId)}')">Save</button></div>
   `);
 }
-function submitEditEntry(entryId) {
-  const entry = findNode(entryId, db.sections); if (!entry) return;
-  const newTitle = document.getElementById('f-title').value.trim();
-  if (newTitle && newTitle.toLowerCase() !== entry.title.toLowerCase() && allTitles(entryId).includes(newTitle.toLowerCase())) {
-    alert(`"${newTitle}" is already used. Please use a unique title.`); return;
-  }
-  entry.title = newTitle || entry.title;
-  entry.commands = document.getElementById('f-cmds').value.trim();
-  entry.notes = document.getElementById('f-notes').value.trim();
-  entry.tags = document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
-  persist(); closeModal(); renderTree(); renderEntry(entryId);
+function submitEditEntry(entryId){
+  const entry=findNode(entryId,db.sections);if(!entry)return;
+  const newTitle=document.getElementById('f-title').value.trim();
+  if(newTitle&&newTitle.toLowerCase()!==entry.title.toLowerCase()&&allTitles(entryId).includes(newTitle.toLowerCase())){alert(`"${newTitle}" is already used.`);return;}
+  entry.title=newTitle||entry.title;
+  entry.commands=document.getElementById('f-cmds').value.trim();
+  entry.notes=document.getElementById('f-notes').value.trim();
+  entry.tags=document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  entry.updatedAt=new Date().toISOString();
+  persist();closeModal();renderTree();renderEntry(entryId);
 }
 
-/* ── Edit node (rename) ── */
-function openEditNodeModal(nodeId) {
-  const node = findNode(nodeId, db.sections); if (!node) return;
+/* ── Rename node ── */
+function openEditNodeModal(nodeId){
+  const node=findNode(nodeId,db.sections);if(!node)return;
   showModal(`
     <h2>Rename <span style="color:var(--accent-text);font-family:var(--mono)">${esc(node.id)}</span></h2>
-    <div class="form-row"><label>Title</label><input id="f-ntitle" value="${esc(node.title)}" /></div>
-    <div class="form-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" onclick="submitRename('${esc(nodeId)}')">Save</button>
-    </div>
+    <div class="form-row"><label>Title</label><input id="f-ntitle" value="${esc(node.title)}"/></div>
+    <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancel</button><button class="btn-save" onclick="submitRename('${esc(nodeId)}')">Save</button></div>
   `);
 }
-function submitRename(nodeId) {
-  const node = findNode(nodeId, db.sections); if (!node) return;
-  const newTitle = document.getElementById('f-ntitle').value.trim();
-  if (newTitle && newTitle.toLowerCase() !== node.title.toLowerCase() && allTitles(nodeId).includes(newTitle.toLowerCase())) {
-    alert(`"${newTitle}" is already used. Please use a unique title.`); return;
-  }
-  node.title = newTitle || node.title;
-  persist(); closeModal(); renderTree(); showFolderView(nodeId);
+function submitRename(nodeId){
+  const node=findNode(nodeId,db.sections);if(!node)return;
+  const newTitle=document.getElementById('f-ntitle').value.trim();
+  if(newTitle&&newTitle.toLowerCase()!==node.title.toLowerCase()&&allTitles(nodeId).includes(newTitle.toLowerCase())){alert(`"${newTitle}" is already used.`);return;}
+  node.title=newTitle||node.title;
+  persist();closeModal();renderTree();showFolderView(nodeId);
 }
 
-/* ── Delete node ── */
-function deleteNode(nodeId) {
-  const node = findNode(nodeId, db.sections);
-  const label = isLeaf(node) ? `task ${nodeId}` : `section ${nodeId} and all its contents`;
-  if (!confirm(`Delete ${label}?`)) return;
-  function removeFrom(nodes) {
-    const idx = nodes.findIndex(n=>n.id===nodeId);
-    if (idx!==-1) { nodes.splice(idx,1); return true; }
-    for (const n of nodes) { if (n.children && removeFrom(n.children)) return true; }
-    return false;
-  }
+/* ── Delete ── */
+function deleteNode(nodeId){
+  const node=findNode(nodeId,db.sections);
+  if(!confirm(`Delete ${isLeaf(node)?`task ${nodeId}`:`section ${nodeId} and all its contents`}?`))return;
+  function removeFrom(nodes){const idx=nodes.findIndex(n=>n.id===nodeId);if(idx!==-1){nodes.splice(idx,1);return true;}for(const n of nodes){if(n.children&&removeFrom(n.children))return true;}return false;}
   removeFrom(db.sections);
-  persist(); activePath = []; openNodes.delete(nodeId); renderTree();
-  document.getElementById('content').innerHTML = `<div id="welcome"><div class="wicon">⌨</div><p>Deleted.</p></div>`;
-  document.getElementById('breadcrumb').innerHTML = 'select a task';
-  document.getElementById('btn-add-entry').style.display = 'none';
+  persist();activePath=[];openNodes.delete(nodeId);renderTree();
+  document.getElementById('content').innerHTML=`<div id="welcome"><div class="wicon">⌨</div><p>Deleted.</p></div>`;
+  document.getElementById('breadcrumb').innerHTML='select a task';
+  document.getElementById('btn-add-entry').style.display='none';
 }
 
-/* ── Modal helpers ── */
-function showModal(html) {
-  document.getElementById('modal-body').innerHTML = html;
-  document.getElementById('overlay').classList.add('open');
-  setTimeout(()=>document.querySelector('.modal input,.modal textarea')?.focus(),100);
-}
-function closeModal() { document.getElementById('overlay').classList.remove('open'); }
-document.getElementById('overlay').addEventListener('click', e=>{ if(e.target===document.getElementById('overlay')) closeModal(); });
+/* ── Modal ── */
+function showModal(html){document.getElementById('modal-body').innerHTML=html;document.getElementById('overlay').classList.add('open');setTimeout(()=>document.querySelector('.modal input,.modal textarea')?.focus(),100);}
+function closeModal(){document.getElementById('overlay').classList.remove('open');}
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
 
 /* ── Export / Import ── */
-function exportData() {
-  const blob = new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='cmdref-backup.json'; a.click(); URL.revokeObjectURL(url);
-}
-function importData() { document.getElementById('import-file').click(); }
-function handleImport(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const parsed = JSON.parse(ev.target.result);
-      if (!parsed.sections) throw new Error();
-      if (confirm('Replace all current data with this backup?')) {
-        db=parsed; persist(); activePath=[]; openNodes.clear(); renderTree();
+function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='cmdref-backup.json';a.click();URL.revokeObjectURL(url);}
+function importData(){document.getElementById('import-file').click();}
+function handleImport(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const parsed=JSON.parse(ev.target.result);
+      if(!parsed.sections)throw new Error();
+      if(confirm('Replace all current data with this backup?')){
+        db=parsed;persist();activePath=[];openNodes.clear();renderTree();
         document.getElementById('content').innerHTML=`<div id="welcome"><div class="wicon">⌨</div><p>Imported successfully.</p></div>`;
         document.getElementById('breadcrumb').innerHTML='select a task';
         document.getElementById('btn-add-entry').style.display='none';
         showToast('Import successful ✓');
       }
-    } catch { alert('Invalid backup file.'); }
+    }catch{alert('Invalid backup file.');}
   };
-  reader.readAsText(file); e.target.value='';
+  reader.readAsText(file);e.target.value='';
 }
 
 /* ── Toast ── */
-function showToast(msg) {
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200);
-}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2400);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-
-renderTree();
+/* ── Boot ── */
+(async()=>{
+  try {
+    db = await loadFromDB();
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('err');
+    showToast('Could not connect to database');
+    db = { sections: [] };
+  }
+  document.getElementById('loading-screen').style.display='none';
+  renderTree();
+})();
 </script>
 </body>
 </html>
