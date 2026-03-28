@@ -21,6 +21,9 @@
   --radius:8px;--radius-lg:12px;--nav-h:52px;
   /* syntax colors */
   --syn-prompt:#f0b860;   /* ASA# Router# lines */
+  --syn-on-device:#64d8a0;  /* On R1: On ASA: etc */
+  --syn-task:#ff9d6c;       /* TASK keyword */
+  --syn-on-line:#1a2e20;    /* background tint for On X: lines */
   --syn-output:#9db8d2;   /* show output lines */
   --syn-comment:#6a9955;  /* ! comment lines */
   --syn-keyword:#c792ea;  /* keywords: no, default, permit, deny */
@@ -151,8 +154,30 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
 .copy-btn{border:0.5px solid var(--border);border-radius:var(--radius);background:var(--card);cursor:pointer;font-size:11px;color:var(--hint);padding:4px 12px;font-family:var(--sans);}
 .copy-btn:hover{color:var(--accent-text);border-color:var(--accent);}
 
+/* ── Tabs ── */
+.tab-bar{display:flex;gap:0;border-bottom:0.5px solid var(--border);margin-bottom:20px;}
+.tab-btn{padding:9px 20px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--muted);font-family:var(--sans);border-bottom:2px solid transparent;margin-bottom:-0.5px;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--accent-text);border-bottom-color:var(--accent);font-weight:500;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── Commands summary ── */
+.cmd-summary-group{margin-bottom:22px;}
+.cmd-summary-device{font-size:11px;text-transform:uppercase;letter-spacing:0.09em;color:var(--hint);margin-bottom:8px;padding-bottom:4px;border-bottom:0.5px solid var(--border);}
+.cmd-summary-device .device-label{color:var(--syn-on-device);font-weight:600;}
+.cmd-line{display:flex;align-items:baseline;gap:10px;padding:4px 0;border-bottom:0.5px solid var(--border);}
+.cmd-line:last-child{border-bottom:none;}
+.cmd-line-text{font-family:var(--mono);font-size:13px;color:var(--accent-text);flex:1;white-space:pre-wrap;word-break:break-all;}
+.cmd-line-copy{border:none;background:none;cursor:pointer;font-size:10px;color:var(--hint);padding:2px 6px;border-radius:var(--radius);flex-shrink:0;}
+.cmd-line-copy:hover{color:var(--accent-text);background:var(--accent-dim);}
+.cmd-summary-empty{color:var(--hint);font-size:13px;padding:20px 0;}
+
 /* ── Syntax highlighting ── */
 .syn-prompt{color:var(--syn-prompt);font-weight:600;}
+.syn-on-device{color:var(--syn-on-device);font-weight:700;font-size:1.05em;display:inline-block;margin-top:4px;}
+.syn-task{color:var(--syn-task);font-weight:700;text-transform:uppercase;letter-spacing:0.04em;}
+.syn-inline-cmd{color:var(--accent-text);font-family:var(--mono);}
 .syn-output{color:var(--syn-output);}
 .syn-comment{color:var(--syn-comment);font-style:italic;}
 .syn-keyword{color:var(--syn-keyword);}
@@ -345,63 +370,143 @@ function buildBreadcrumbParts(targetId,nodes=db.sections,path=[]){
 }
 
 /* ── Syntax highlighter ── */
-function highlightContent(raw){
-  if(!raw)return'';
-  const lines=raw.split('\n');
-  return lines.map(line=>{
-    const escaped=escHtml(line);
-    // Bold: **text**
-    const withBold=escaped.replace(/\*\*(.+?)\*\*/g,'<span class="syn-bold">$1</span>');
-    // Prompt line: ends with # or has Router# ASA# hostname(config)# etc.
-    if(/^[A-Za-z0-9_\-]+(\([^)]*\))*#/.test(line)){
-      return`<span class="syn-prompt">${withBold}</span>`;
-    }
-    // Comment / separator line starting with !
-    if(/^\s*!/.test(line)){
-      return`<span class="syn-comment">${withBold}</span>`;
-    }
-    // show output lines (indented or starts with known output patterns)
-    // We detect: lines that follow a prompt line or look like show output
-    // (non-command lines that don't start with a keyword)
-    return`<span class="syn-output">${withBold}</span>`;
-  }).join('\n');
+
+// Detects "On X:" device-targeting lines
+// Matches: "On R1:", "On ASA:", "On FTD:", "On ISE:", "On SW1:", etc.
+const ON_DEVICE_RE = /^(On\s+[A-Za-z0-9_\-]+\s*:)/i;
+// Detects TASK keyword at start of line or standalone
+const TASK_RE = /TASK/g;
+// Detects prompt lines: word(context)# or word#
+const PROMPT_RE = /^[A-Za-z0-9_][A-Za-z0-9_\-]*(\([^)]*\))*#(\s|$)/;
+// Inline command marker: "some text # command here"
+// The # must be preceded by a space (not a prompt # which is at end of hostname)
+const INLINE_CMD_RE = /^(.*?)\s#\s(.+)$/;
+
+function applyBold(escaped){
+  return escaped.replace(/\*\*(.+?)\*\*/g,'<span class="syn-bold">$1</span>');
+}
+function applyTask(html){
+  return html.replace(/TASK/g,'<span class="syn-task">TASK</span>');
 }
 
-// Smarter highlighter that tracks context (after a # prompt = show output until next prompt)
 function highlightSmart(raw){
   if(!raw)return'';
-  const lines=raw.split('\n');
-  let inShowOutput=false;
-  return lines.map(line=>{
-    const escaped=escHtml(line);
-    // Apply **bold** first
-    const withBold=escaped.replace(/\*\*(.+?)\*\*/g,'<span class="syn-bold">$1</span>');
+  const lines = raw.split('\n');
+  return lines.map(line => {
+    const escaped = escHtml(line);
+    let html = applyBold(escaped);
 
     // Empty line
-    if(line.trim()===''){inShowOutput=false;return withBold;}
+    if(!line.trim()) return html;
 
-    // ! comment
-    if(/^\s*!/.test(line))return`<span class="syn-comment">${withBold}</span>`;
-
-    // Prompt line: word(optionalcontext)# or word# — marks start of a command
-    if(/^[A-Za-z0-9_\-]+(\([^)]*\))*#\s/.test(line)||/^[A-Za-z0-9_\-]+(\([^)]*\))*#$/.test(line)){
-      inShowOutput=true; // lines after this prompt are show output until next prompt
-      return`<span class="syn-prompt">${withBold}</span>`;
+    // "On X:" device line — full line gets device color
+    if(ON_DEVICE_RE.test(line.trim())){
+      // Highlight the "On X:" part, rest is normal text
+      html = html.replace(
+        /(On\s+[A-Za-z0-9_\-]+\s*:)/i,
+        '<span class="syn-on-device">$1</span>'
+      );
+      return '<span>' + applyTask(html) + '</span>';
     }
 
-    // If we're after a prompt line, this is show output
-    if(inShowOutput){
-      // But if it looks like a config command (no leading spaces, starts with keyword), treat as config
-      if(/^(interface|ip |ipv6|router |access-list|route |nat |object |policy|service|crypto|tunnel|network|subnet|host|range|no |default |permit |deny |class |description|shutdown|bandwidth|logging|snmp|username|password|enable|aaa |ldap|http|ssh|telnet|ftp|ntp|dns|domain|hostname|version|boot|memory|flash|disk|vlan|spanning|port|channel|lacp|vpc|hsrp|vrrp|glbp|ospf|eigrp|bgp|rip|static|set |match |call |dial|isdn|frame|atm|ppp|serial|ethernet|gigabit|fastethernet|tengigabit|management|outside|inside|dmz)/i.test(line.trim())){
-        return`<span class="syn-output">${withBold}</span>`;
-      }
-      return`<span class="syn-output">${withBold}</span>`;
+    // TASK keyword line (line starts with TASK or TASK is prominent)
+    if(/^TASK/i.test(line.trim())){
+      return '<span class="syn-task">' + html + '</span>';
     }
 
-    // Default: plain text (notes/description content)
-    return withBold;
+    // ! comment / separator
+    if(/^\s*!/.test(line)){
+      return '<span class="syn-comment">' + html + '</span>';
+    }
+
+    // Prompt line: hostname# or hostname(config)#
+    if(PROMPT_RE.test(line.trim())){
+      return '<span class="syn-prompt">' + applyTask(html) + '</span>';
+    }
+
+    // Inline command marker: "description text # cisco command here"
+    const inlineMatch = line.match(INLINE_CMD_RE);
+    if(inlineMatch){
+      const descPart = escHtml(inlineMatch[1]);
+      const cmdPart  = escHtml(inlineMatch[2]);
+      return applyTask(applyBold(descPart)) +
+             ' <span style="color:var(--hint)">#</span> ' +
+             '<span class="syn-inline-cmd">' + applyBold(cmdPart) + '</span>';
+    }
+
+    // Default — plain note text, apply TASK highlight and bold
+    return applyTask(html);
   }).join('\n');
 }
+
+/* ── Command extractor (for summary tab) ── */
+function extractCommands(raw){
+  if(!raw) return [];
+  const lines = raw.split('\n');
+  // groups: { device: 'On R1', commands: ['cmd1','cmd2'] }
+  const groups = [];
+  let currentDevice = 'General';
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if(!trimmed) return;
+
+    // New device section
+    const devMatch = trimmed.match(/^(On\s+[A-Za-z0-9_\-]+\s*):/i);
+    if(devMatch){
+      currentDevice = devMatch[1].trim();
+      return;
+    }
+
+    // Inline command: "description # command"
+    const inlineMatch = line.match(INLINE_CMD_RE);
+    if(inlineMatch){
+      const cmd = inlineMatch[2].trim();
+      if(cmd) addCmd(groups, currentDevice, cmd);
+      return;
+    }
+
+    // Prompt line with command after #: "ASA(config)# nat ..."
+    const promptMatch = trimmed.match(/^[A-Za-z0-9_][A-Za-z0-9_\-]*(\([^)]*\))*#\s+(.+)/);
+    if(promptMatch){
+      const cmd = promptMatch[2].trim();
+      if(cmd) addCmd(groups, currentDevice, cmd);
+      return;
+    }
+  });
+
+  return groups;
+}
+
+function addCmd(groups, device, cmd){
+  let grp = groups.find(g => g.device === device);
+  if(!grp){ grp = {device, commands:[]}; groups.push(grp); }
+  if(!grp.commands.includes(cmd)) grp.commands.push(cmd);
+}
+
+function renderCmdSummary(raw){
+  const groups = extractCommands(raw);
+  if(!groups.length || groups.every(g=>!g.commands.length)){
+    return '<div class="cmd-summary-empty">No commands detected yet.<br><span style="font-size:12px;">Use <code style="background:var(--card2);padding:1px 5px;border-radius:4px;">description # command</code> in your notes, or type prompt lines like <code style="background:var(--card2);padding:1px 5px;border-radius:4px;">ASA# show run</code></span></div>';
+  }
+  return groups.filter(g=>g.commands.length).map(grp=>`
+    <div class="cmd-summary-group">
+      <div class="cmd-summary-device"><span class="device-label">${escHtml(grp.device)}</span></div>
+      ${grp.commands.map((cmd,i)=>`
+        <div class="cmd-line">
+          <span class="cmd-line-text">${escHtml(cmd)}</span>
+          <button class="cmd-line-copy" onclick="copyText(${JSON.stringify(cmd)},this)">copy</button>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function copyText(text, btn){
+  navigator.clipboard.writeText(text).then(()=>{
+    const orig=btn.textContent; btn.textContent='✓'; btn.style.color='var(--success)';
+    setTimeout(()=>{btn.textContent=orig;btn.style.color='';},1800);
+  }).catch(()=>{showToast('Copied');});
+}
+
 
 /* ── Tree render ── */
 function renderTree(){
@@ -592,13 +697,21 @@ function selectEntry(entryId){
 }
 
 /* ── Entry VIEW ── */
+let activeTab = 'content'; // 'content' | 'summary'
+
+function switchTab(tab){
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.tab===tab));
+}
+
 function renderEntryView(entryId){
   const entry=findNode(entryId,db.sections);if(!entry)return;
   migrateEntry(entry);
   setBreadcrumb(entryId);
   const imgs=entry.images||[];
   const highlighted=highlightSmart(entry.content||'');
-  // Extract plain commands for copy (lines with # prompt or config lines)
+  const cmdSummaryHtml=renderCmdSummary(entry.content||'');
   document.getElementById('content').innerHTML=`
     <div class="entry-topbar">
       <div class="entry-meta">
@@ -611,26 +724,38 @@ function renderEntryView(entryId){
       </div>
     </div>
     ${(entry.tags||[]).length?`<div class="tags-row">${entry.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}
-    ${entry.content?.trim()?`
-      <div class="content-block">
-        <div class="content-block-inner">${highlighted}</div>
-        <div class="copy-bar">
-          <span>Commands &amp; Notes</span>
-          <button class="copy-btn" onclick="copyContent('${esc(entryId)}',this)">Copy all</button>
+    <div class="tab-bar">
+      <button class="tab-btn ${activeTab==='content'?'active':''}" data-tab="content" onclick="switchTab('content')">Content</button>
+      <button class="tab-btn ${activeTab==='summary'?'active':''}" data-tab="summary" onclick="switchTab('summary')">Commands Summary</button>
+    </div>
+    <div class="tab-panel ${activeTab==='content'?'active':''}" data-tab="content">
+      ${entry.content?.trim()?`
+        <div class="content-block">
+          <div class="content-block-inner">${highlighted}</div>
+          <div class="copy-bar">
+            <span>Content</span>
+            <button class="copy-btn" onclick="copyContent('${esc(entryId)}',this)">Copy all</button>
+          </div>
+        </div>`:'<div style="color:var(--hint);font-size:13px;padding:20px 0;">No content yet. Click Edit to start writing.</div>'}
+      <div class="images-section">
+        <div class="field-label">Diagrams / Images</div>
+        <div class="img-grid">${imgs.map((img,i)=>`<div class="img-thumb"><img src="${img.data}" alt="${esc(img.name||'')}" onclick="openLightbox('${esc(entryId)}',${i})"/><button class="img-del desktop-only" onclick="deleteImage('${esc(entryId)}',${i})">✕</button></div>`).join('')}</div>
+        <div class="img-drop-zone desktop-only" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event,'${esc(entryId)}')">
+          <input type="file" accept="image/*" multiple onchange="handleFileInput(event,'${esc(entryId)}')"/>
+          <div>📎 Drop images here, click to upload, or press Ctrl+V to paste</div>
+          <div class="img-caption">PNG · JPG · SVG · WEBP</div>
         </div>
-      </div>`:''}
-    <div class="images-section">
-      <div class="field-label">Diagrams / Images</div>
-      <div class="img-grid">${imgs.map((img,i)=>`<div class="img-thumb"><img src="${img.data}" alt="${esc(img.name||'')}" onclick="openLightbox('${esc(entryId)}',${i})"/><button class="img-del desktop-only" onclick="deleteImage('${esc(entryId)}',${i})">✕</button></div>`).join('')}</div>
-      <div class="img-drop-zone desktop-only" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event,'${esc(entryId)}')">
-        <input type="file" accept="image/*" multiple onchange="handleFileInput(event,'${esc(entryId)}')"/>
-        <div>📎 Drop images here, click to upload, or press Ctrl+V to paste</div>
-        <div class="img-caption">PNG · JPG · SVG · WEBP</div>
       </div>
     </div>
-    ${!entry.content?.trim()&&!imgs.length?'<div style="color:var(--hint);font-size:13px;padding:20px 0;">No content yet. Click Edit to start writing.</div>':''}
+    <div class="tab-panel ${activeTab==='summary'?'active':''}" data-tab="summary">
+      ${cmdSummaryHtml}
+    </div>
   `;
   document.getElementById('content').scrollTop=0;
+  // Re-attach tab click state after innerHTML replace
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    b.addEventListener('click',()=>switchTab(b.dataset.tab));
+  });
 }
 
 /* ── Entry EDITOR ── */
