@@ -169,8 +169,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
 .cmd-line{display:flex;align-items:baseline;gap:10px;padding:4px 0;border-bottom:0.5px solid var(--border);}
 .cmd-line:last-child{border-bottom:none;}
 .cmd-line-text{font-family:var(--mono);font-size:13px;color:var(--accent-text);flex:1;white-space:pre-wrap;word-break:break-all;}
-.cmd-line-copy{border:none;background:none;cursor:pointer;font-size:10px;color:var(--hint);padding:2px 6px;border-radius:var(--radius);flex-shrink:0;}
-.cmd-line-copy:hover{color:var(--accent-text);background:var(--accent-dim);}
+
 .cmd-summary-empty{color:var(--hint);font-size:13px;padding:20px 0;}
 
 /* ── Syntax highlighting ── */
@@ -495,7 +494,6 @@ function renderCmdSummary(raw){
       ${grp.commands.map((cmd,i)=>`
         <div class="cmd-line">
           <span class="cmd-line-text">${escHtml(cmd)}</span>
-          <button class="cmd-line-copy" onclick="copyText(${JSON.stringify(cmd)},this)">copy</button>
         </div>`).join('')}
     </div>`).join('');
 }
