@@ -376,7 +376,7 @@ const ON_DEVICE_RE = /^(On\s+[A-Za-z0-9_\-]+\s*:)/i;
 // Detects TASK keyword at start of line or standalone
 const TASK_RE = /TASK/g;
 // Detects prompt lines: word(context)# or word#
-const PROMPT_RE = /^[A-Za-z0-9_][A-Za-z0-9_\-]*(\([^)]*\))*#(\s|$)/;
+const PROMPT_RE = /^[A-Za-z0-9_][A-Za-z0-9_\-]*(\([^)]*\))*#(\s|\S|$)/;
 // Inline command marker: "some text # command here"
 // The # must be preceded by a space (not a prompt # which is at end of hostname)
 const INLINE_CMD_RE = /^(.*?)\s#\s(.+)$/;
@@ -471,7 +471,7 @@ function extractCommands(raw){
 
     // Prompt line with command after #: "ASA(config)# nat ..." / "SW1(config-if)# ip address ..."
     // Device name can be R1, R2, ASA, FTD, SW1, ISE, or any hostname
-    const promptMatch = trimmed.match(/^([A-Za-z0-9][A-Za-z0-9_\-]*)(\([^)]*\))*#\s+(.+)/);
+    const promptMatch = trimmed.match(/^([A-Za-z0-9][A-Za-z0-9_\-]*)(\([^)]*\))*#\s*(\S.*)/);
     if(promptMatch){
       // Use the device hostname as the group name if we don't have an "On X:" override
       const hostname = promptMatch[1];
