@@ -649,11 +649,30 @@ function showRenameForm(nodeId){
   const target=area||document.getElementById('content');
   target.innerHTML=`
     <div class="inline-form">
-      <h3>Rename <span style="font-family:var(--mono);color:var(--accent-text)">${esc(node.id)}</span></h3>
-      <div class="if-row"><label>Title</label><input id="f-ntitle" value="${esc(node.title)}"/></div>
-      <div class="if-actions"><button class="if-save" onclick="submitRename('${esc(nodeId)}')">Save</button><button class="if-cancel" onclick="showFolderView('${esc(nodeId)}')">Cancel</button></div>
+      <h3>Edit ID &amp; Title</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="if-row">
+          <label>ID</label>
+          <input id="f-nid" value="${esc(node.id)}" style="font-family:var(--mono);color:var(--accent-text);" placeholder="e.g. 1.1"/>
+        </div>
+        <div class="if-row">
+          <label>Title</label>
+          <input id="f-ntitle" value="${esc(node.title)}" placeholder="Descriptive name"/>
+        </div>
+      </div>
+      <div class="if-actions">
+        <button class="if-save" onclick="submitRename('${esc(nodeId)}')">Save</button>
+        <button class="if-cancel" onclick="showFolderView('${esc(nodeId)}')">Cancel</button>
+      </div>
     </div>`;
-  setTimeout(()=>document.getElementById('f-ntitle')?.focus(),50);
+  setTimeout(()=>document.getElementById('f-nid')?.focus(),50);
+  // Enter to save on both fields
+  ['f-nid','f-ntitle'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('keydown',e=>{
+      if(e.key==='Enter') submitRename(nodeId);
+      if(e.key==='Escape') showFolderView(nodeId);
+    });
+  });
 }
 
 function cancelForm(){
@@ -696,10 +715,28 @@ function submitAddTask(parentId){
 
 function submitRename(nodeId){
   const node=findNode(nodeId,db.sections);if(!node)return;
-  const newTitle=document.getElementById('f-ntitle').value.trim();
-  if(newTitle&&newTitle.toLowerCase()!==node.title.toLowerCase()&&allTitles(nodeId).includes(newTitle.toLowerCase())){showToast(`"${newTitle}" is already used.`);return;}
-  node.title=newTitle||node.title;node.updatedAt=new Date().toISOString();
-  persist();renderTree();showFolderView(nodeId);
+  const newTitle=(document.getElementById('f-ntitle')?.value||'').trim();
+  const newId=(document.getElementById('f-nid')?.value||'').trim();
+  // Validate title
+  if(newTitle&&newTitle.toLowerCase()!==node.title.toLowerCase()&&allTitles(nodeId).includes(newTitle.toLowerCase())){
+    showToast('"'+newTitle+'" is already used.');return;
+  }
+  // Validate ID
+  if(newId && newId!==node.id){
+    if(findNode(newId,db.sections)){showToast('ID "'+newId+'" is already used.');return;}
+  }
+  if(newTitle) node.title=newTitle;
+  const finalId = (newId && newId!==nodeId) ? newId : nodeId;
+  if(newId && newId!==nodeId){
+    node.id=newId;
+    // Update activePath if this node is in current path
+    activePath=activePath.map(p=>p===nodeId?newId:p);
+    // Update openNodes
+    if(openNodes.has(nodeId)){openNodes.delete(nodeId);openNodes.add(newId);}
+  }
+  node.updatedAt=new Date().toISOString();
+  persist();renderTree();showFolderView(finalId);
+  showToast('Saved ✓');
 }
 
 /* ── Migration: old entries (commands+notes) → new unified content ── */
