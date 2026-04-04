@@ -80,6 +80,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
 .lvl2.open>.lvl2-children{display:block;}
 .lvl3>.node-btn{padding:5px 14px 5px 40px;font-size:12px;color:var(--muted);}
 .lvl3>.node-btn.active{color:var(--accent-text);}
+.lvl3-children{display:none;}
+.lvl3.open>.lvl3-children{display:block;}
+.lvl4>.node-btn{padding:5px 14px 5px 54px;font-size:11px;color:var(--hint);}
+.lvl4>.node-btn.active{color:var(--accent-text);}
 #sidebar-actions{border-top:0.5px solid var(--border);}
 .btn-add-sec{width:100%;text-align:left;border:none;background:none;cursor:pointer;padding:10px 14px;font-size:12px;color:var(--hint);display:flex;align-items:center;gap:6px;}
 .btn-add-sec:hover{color:var(--accent);}
@@ -207,6 +211,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
 .ee-unified:focus{border-color:var(--accent);}
 .ee-tags-input{font-family:var(--sans);}
 .autosave-bar{display:flex;align-items:center;gap:10px;padding:12px 0 4px;border-top:0.5px solid var(--border);margin-top:8px;}
+.edit-mode-banner{display:flex;align-items:center;gap:8px;padding:9px 14px;margin-bottom:18px;background:var(--card2);border-radius:var(--radius);border-left:3px solid var(--accent);font-size:12px;color:var(--muted);}
+.edit-mode-icon{color:var(--accent-text);font-size:14px;}
+.edit-mode-sep{color:var(--hint);}
+.edit-mode-note{color:var(--hint);font-size:11px;}
 .ee-save-btn{padding:9px 24px;border-radius:var(--radius);border:none;background:var(--accent);cursor:pointer;font-size:13px;color:#1a1200;font-family:var(--sans);font-weight:600;}
 .ee-save-btn:hover{opacity:0.9;}
 .ee-discard-btn{padding:9px 16px;border-radius:var(--radius);border:0.5px solid var(--border-em);background:transparent;cursor:pointer;font-size:13px;color:var(--muted);font-family:var(--sans);}
@@ -449,15 +457,17 @@ function extractCommands(raw){
   // groups: { device: 'On R1', commands: ['cmd1','cmd2'] }
   const groups = [];
   let currentDevice = 'General';
+  let onDeviceOverride = false; // true when "On X:" label was explicitly set
 
   lines.forEach(line => {
     const trimmed = line.trim();
     if(!trimmed) return;
 
-    // New device section
+    // Explicit "On X:" label — takes priority and locks device
     const devMatch = trimmed.match(/^(On\s+[A-Za-z0-9_\-]+\s*):/i);
     if(devMatch){
       currentDevice = devMatch[1].trim();
+      onDeviceOverride = true;
       return;
     }
 
@@ -469,18 +479,24 @@ function extractCommands(raw){
       return;
     }
 
-    // Prompt line with command after #: "ASA(config)# nat ..." / "SW1(config-if)# ip address ..."
-    // Device name can be R1, R2, ASA, FTD, SW1, ISE, or any hostname
+    // Prompt line: ASA(config)# / R1(config-if)# / SW1# etc.
     const promptMatch = trimmed.match(/^([A-Za-z0-9][A-Za-z0-9_\-]*)(\([^)]*\))*#\s*(\S.*)/);
     if(promptMatch){
-      // Use the device hostname as the group name if we don't have an "On X:" override
       const hostname = promptMatch[1];
       const cmd = promptMatch[3].trim();
-      if(cmd){
-        // If still in 'General', switch to the hostname as device
-        const effectiveDevice = (currentDevice === 'General') ? hostname : currentDevice;
-        addCmd(groups, effectiveDevice, cmd);
+      // Auto-switch device group to match the hostname from the prompt
+      // "On X:" labels override, otherwise hostname drives the group
+      if(currentDevice === 'General' || !onDeviceOverride){
+        currentDevice = hostname;
       }
+      if(cmd) addCmd(groups, currentDevice, cmd);
+      return;
+    }
+    // Bare prompt line with no command (e.g. "ASA(config)#") — update device context
+    const barePrompt = trimmed.match(/^([A-Za-z0-9][A-Za-z0-9_\-]*)(\([^)]*\))*#\s*$/);
+    if(barePrompt){
+      const hostname = barePrompt[1];
+      if(currentDevice === 'General' || !onDeviceOverride) currentDevice = hostname;
       return;
     }
   });
@@ -590,7 +606,9 @@ function showFolderView(nodeId){
     `<button class="btn-sm desktop-only" onclick="showRenameForm('${esc(nodeId)}')">Rename</button>`,
     `<button class="btn-sm danger desktop-only" onclick="deleteNode('${esc(nodeId)}')">Delete</button>`
   ].join('');
+  const depthLabel = ['Section','Subsection',''][depth] || '';
   document.getElementById('content').innerHTML=`
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--hint);margin-bottom:6px;">${depthLabel}</div>
     <div class="folder-id">${esc(node.id)}</div>
     <div class="folder-title-text">${esc(node.title)}</div>
     <div class="folder-actions">${addBtns}</div>
@@ -727,10 +745,10 @@ function renderEntryView(entryId){
         <div class="entry-id">${esc(entry.id)}</div>
         <div class="entry-title-disp">${esc(entry.title)}</div>
       </div>
-      <div class="entry-actions desktop-only">
-        <button class="btn-sm" onclick="editField('${esc(entryId)}','title')" title="Edit title">Title</button>
-        <button class="btn-sm" onclick="editField('${esc(entryId)}','tags')" title="Edit tags">Tags</button>
-        <button class="btn-sm primary" onclick="renderEntryEditor('${esc(entryId)}')" title="Edit all content">Edit Content</button>
+      <div class="entry-actions desktop-only" id="entry-action-bar">
+        <button class="btn-sm" id="btn-edit-title" onclick="editField('${esc(entryId)}','title')" title="Edit title">Title</button>
+        <button class="btn-sm" id="btn-edit-tags" onclick="editField('${esc(entryId)}','tags')" title="Edit tags">Tags</button>
+        <button class="btn-sm primary" id="btn-edit-content" onclick="renderEntryEditor('${esc(entryId)}')" title="Edit all content">Edit Content</button>
         <button class="btn-sm danger" onclick="deleteNode('${esc(entryId)}')">Delete</button>
       </div>
     </div>
@@ -848,31 +866,31 @@ function renderEntryEditor(entryId){
 
   document.getElementById('content').innerHTML=`
     <div class="entry-editor">
+      <div class="edit-mode-banner">
+        <span class="edit-mode-icon">✎</span>
+        <span>Editing content &amp; diagrams</span>
+        <span class="edit-mode-sep">·</span>
+        <span class="edit-mode-note">To edit Title or Tags, Save or Discard first</span>
+      </div>
       ${hasDraft?`<div style="background:var(--accent-dim);border:0.5px solid var(--accent);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--accent-text);">
-        ⚠ A draft was recovered from your last session. It has been restored below.
+        ⚠ A draft was recovered from your last session.
         <button onclick="clearDraft('${esc(entryId)}');renderEntryEditor('${esc(entryId)}')" style="margin-left:12px;background:none;border:0.5px solid var(--accent);border-radius:var(--radius);color:var(--accent-text);cursor:pointer;font-size:11px;padding:2px 8px;">Discard draft</button>
       </div>`:''}
       <div class="ee-row">
-        <div class="ee-label">Title</div>
-        <input class="ee-input" id="ee-title" value="${esc(titleToShow)}" placeholder="Task title"/>
-      </div>
-      <div class="ee-row">
         <div class="ee-label">
           Content
-          <span class="ee-hint">— mix commands, show output, and notes freely · use **bold** · lines with # are highlighted as prompts · ! lines are comments</span>
+          <span class="ee-hint">— commands, show output, notes · **bold** · hostname# = prompt · ! = comment · On R1: = device section</span>
         </div>
         <textarea class="ee-unified" id="ee-content" placeholder="Type or paste commands, show output, notes — everything goes here…
 
 Example:
-ASA(config)# show run nat
-nat (inside,outside) source dynamic o-net interface
+TASK Configure NAT
+
+On ASA:
+ASA(config)# nat (inside,outside) source dynamic any interface
 !
 **Note:** Configure NAT before applying ACL.
 ASA(config)#">${esc(contentToShow)}</textarea>
-      </div>
-      <div class="ee-row">
-        <div class="ee-label">Tags <span class="ee-hint">(comma-separated)</span></div>
-        <input class="ee-input ee-tags-input" id="ee-tags" value="${esc(tagsToShow)}" placeholder="vpn, ipsec, nat"/>
       </div>
       <div class="images-section">
         <div class="ee-label">Diagrams / Images <span class="ee-hint">— paste Ctrl+V, drag &amp; drop, or upload</span></div>
@@ -900,13 +918,13 @@ ASA(config)#">${esc(contentToShow)}</textarea>
     clearTimeout(autoSaveTimer);
     autoSaveTimer=setTimeout(()=>{
       const hint=document.getElementById('autosave-hint');
-      saveDraft(entryId,ta.value,document.getElementById('ee-tags')?.value||'',document.getElementById('ee-title')?.value||'');
+      saveDraft(entryId,ta.value,'','');
       if(hint){hint.textContent='Draft saved locally ✓';hint.className='autosave-hint saved';}
       setTimeout(()=>{if(hint){hint.textContent='Draft auto-saved locally';hint.className='autosave-hint';}},2000);
     },3000);
   });
 
-  document.getElementById('ee-title')?.focus();
+  document.getElementById('ee-content')?.focus();
 }
 
 function discardEdit(entryId){
@@ -918,11 +936,9 @@ function discardEdit(entryId){
 /* ── Save entry ── */
 function submitEditEntry(entryId){
   const entry=findNode(entryId,db.sections);if(!entry)return;
-  const newTitle=document.getElementById('ee-title').value.trim();
-  if(newTitle&&newTitle.toLowerCase()!==entry.title.toLowerCase()&&allTitles(entryId).includes(newTitle.toLowerCase())){showToast(`"${newTitle}" is already used.`);return;}
-  entry.title=newTitle||entry.title;
+  // Content-only edit — title/tags handled by separate field editors
+  // Title and Tags are not in the content editor — only content is edited here
   entry.content=document.getElementById('ee-content').value;
-  entry.tags=document.getElementById('ee-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
   entry.updatedAt=new Date().toISOString();
   clearDraft(entryId);
   editingEntryId=null;
