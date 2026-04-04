@@ -796,8 +796,17 @@ function editField(entryId, field){
 
   if(field === 'title'){
     wrapper.innerHTML = `
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--hint);margin-bottom:8px;">Edit Title</div>
-      <input id="fe-input" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-em);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:15px;font-family:var(--sans);outline:none;" value="${escJs(entry.title)}"/>
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--hint);margin-bottom:8px;">Edit Title &amp; ID</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0;">
+        <div>
+          <div style="font-size:10px;color:var(--hint);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em;">ID</div>
+          <input id="fe-id" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-em);border-radius:var(--radius);background:var(--surface);color:var(--accent-text);font-size:14px;font-family:var(--mono);outline:none;" value="${escJs(entry.id)}" placeholder="e.g. 1.1.1"/>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--hint);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em;">Title</div>
+          <input id="fe-input" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-em);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:14px;font-family:var(--sans);outline:none;" value="${escJs(entry.title)}" placeholder="Descriptive name"/>
+        </div>
+      </div>
       <div style="display:flex;gap:8px;margin-top:12px;">
         <button class="if-save" onclick="saveField('${escJs(entryId)}','title')">Save</button>
         <button class="if-cancel" onclick="closeFieldEdit('${escJs(entryId)}')">Cancel</button>
@@ -818,10 +827,12 @@ function editField(entryId, field){
   contentEl.scrollTop = 0;
   setTimeout(()=>document.getElementById('fe-input')?.focus(), 50);
 
-  // Allow Enter to save
-  document.getElementById('fe-input').addEventListener('keydown', e=>{
-    if(e.key==='Enter') saveField(entryId, field);
-    if(e.key==='Escape') closeFieldEdit(entryId);
+  // Allow Enter to save on both inputs
+  ['fe-input','fe-id'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('keydown', e=>{
+      if(e.key==='Enter') saveField(entryId, field);
+      if(e.key==='Escape') closeFieldEdit(entryId);
+    });
   });
 }
 
@@ -829,11 +840,24 @@ function saveField(entryId, field){
   const entry = findNode(entryId, db.sections); if(!entry) return;
   const val = document.getElementById('fe-input')?.value || '';
   if(field === 'title'){
-    const newTitle = val.trim();
+    const newTitle = (document.getElementById('fe-input')?.value || '').trim();
+    const newId    = (document.getElementById('fe-id')?.value    || '').trim();
+    // Validate title uniqueness
     if(newTitle && newTitle.toLowerCase()!==entry.title.toLowerCase() && allTitles(entryId).includes(newTitle.toLowerCase())){
       showToast('"'+newTitle+'" is already used.'); return;
     }
-    entry.title = newTitle || entry.title;
+    // Validate ID uniqueness (must not exist elsewhere)
+    if(newId && newId !== entry.id){
+      const existing = findNode(newId, db.sections);
+      if(existing){ showToast('ID "'+newId+'" is already used.'); return; }
+    }
+    if(newTitle) entry.title = newTitle;
+    if(newId && newId !== entry.id){
+      // Update activePath to reflect new ID
+      entry.id = newId;
+      activePath = activePath.map(p => p === entryId ? newId : p);
+      entryId = newId; // update local var for re-render
+    }
   } else if(field === 'tags'){
     entry.tags = val.split(',').map(t=>t.trim()).filter(Boolean);
   }
