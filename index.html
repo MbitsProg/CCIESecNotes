@@ -908,7 +908,7 @@ function renderEntryView(entryId){
       <button class="tab-btn ${activeTab==='summary'?'active':''}" data-tab="summary" onclick="switchTab('summary')">Commands Summary</button>
     </div>
     <div class="tab-panel ${activeTab==='content'?'active':''}" data-tab="content">
-      ${hasContent?blocksHtml+'<div class="copy-bar" style="margin-top:12px;"><span>Text content</span><button class="copy-btn" onclick="copyContent(''+esc(entryId)+'',this)">Copy text</button></div>':'<div style="color:var(--hint);font-size:13px;padding:20px 0;">No content yet. Click Edit to start writing.</div>'}
+      ${hasContent?(blocksHtml+'<div class="copy-bar" style="margin-top:12px;"><span>Text content</span><button class="copy-btn" onclick="copyContent(this.dataset.id,this)" data-id="'+esc(entryId)+'">Copy text</button></div>'):'<div style="color:var(--hint);font-size:13px;padding:20px 0;">No content yet. Click Edit to start writing.</div>'}
     </div>
     <div class="tab-panel ${activeTab==='summary'?'active':''}" data-tab="summary">
       ${cmdSummaryHtml}
