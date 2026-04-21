@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0f1117"/>
-<title>cmdref</title>
+<title>CCIE Security Notes</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -308,12 +308,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
 </head>
 <body>
 <div id="loading-screen">
-  <div class="l-logo">⌨ cmdref</div>
+  <div class="l-logo">⌨ CCIE Security Notes</div>
   <div class="spinner"></div>
 </div>
 <div id="topnav">
   <button id="hamburger" onclick="toggleSidebar()">☰</button>
-  <span class="logo">⌨ cmdref</span>
+  <span class="logo">⌨ CCIE Security Notes</span>
   <span class="tagline">command reference</span>
   <div class="spacer"></div>
   <div id="sync-status"><div id="sync-dot"></div><span id="sync-label">–</span></div>
@@ -1384,7 +1384,7 @@ function toggleSidebar(){const sb=document.getElementById('sidebar'),ov=document
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('open');}
 
 /* ── Export / Import ── */
-function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='cmdref-backup.json';a.click();URL.revokeObjectURL(url);}
+function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ccie-security-notes-backup.json';a.click();URL.revokeObjectURL(url);}
 function importData(){document.getElementById('import-file').click();}
 function handleImport(e){
   const file=e.target.files[0];if(!file)return;
